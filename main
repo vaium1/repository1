@@ -1,0 +1,104 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Character {
+private:
+    string name;
+    int health;
+    int attack;
+    int defense;
+
+public:
+    Character(string name, int health, int attack, int defense) : 
+        name(name), health(health), attack(attack), defense(defense) {}
+
+    virtual ~Character() = default;
+
+    string getName() const { return name; }
+    int getHealth() const { return health; }
+
+    virtual void attackCharacter(Character& enemy) {
+        int damage = attack - enemy.defense;
+        if (damage > 0) {
+            enemy.takeDamage(damage);
+            cout << name << " attacks " << enemy.getName() << " for " << damage << " damage!\n";
+        } else {
+            cout << name << " attacks " << enemy.getName() << " but does no damage!\n";
+        }
+    }
+
+    void takeDamage(int damage) {
+        health -= damage;
+        if (health <= 0) {
+            std::cout << name << " is defeated!\n";
+        }
+    }
+
+    virtual void displayStats() const {
+        cout << "Name: " << name << "\n";
+        cout << "Health: " << health << "\n";
+        cout << "Attack: " << attack << "\n";
+        cout << "Defense: " << defense << "\n";
+    }
+
+    // Declare specialAttack as virtual
+    virtual void specialAttack(Character& enemy) = 0; 
+};
+
+class Warrior : public Character {
+public:
+    Warrior(string name) : Character(name, 100, 20, 10) {}
+
+    void displayStats() const override {
+        cout << "Warrior: ";
+        Character::displayStats();
+    }
+    void specialAttack(Character& enemy) override {        int damage = attack * 2 - enemy.getHealth()/2;
+        if (damage > 0) {
+            enemy.takeDamage(damage);
+            cout << getName() << " performs a special attack on " << enemy.getName() << " dealing " << damage << " damage!\n";
+        } else {
+          cout << getName() << " tries a special attack, but fails!\n";
+        }
+    }
+};
+
+
+class Mage : public Character {
+public:
+    Mage(string name) : Character(name, 80, 15, 5) {}
+
+    void displayStats() const override {
+        cout << "Mage: ";
+        Character::displayStats();
+    }
+    void specialAttack(Character& enemy) override {
+        int damage = attack * 1.5; 
+        enemy.takeDamage(damage);
+        cout << getName() << " casts a spell on " << enemy.getName() << " dealing " << damage << " damage!\n";
+    }
+};
+
+void battle(Character& c1, Character& c2) {
+  while (c1.getHealth() > 0 && c2.getHealth() > 0) {
+      c1.attackCharacter(c2);
+      if (c2.getHealth() <= 0) break;
+      c2.attackCharacter(c1);
+  }
+}
+
+int main() {
+  Warrior warrior("Conan");
+  Mage mage("Merlin");
+
+  warrior.displayStats();
+  cout << endl;
+  mage.displayStats();
+  cout << endl;
+
+  battle(warrior, mage);
+
+  return 0;
+}
